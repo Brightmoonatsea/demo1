@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+    <h1>这是首页</h1>
+    <div>
+        {% for book in books %}
+        <ul>
+             <li>
+                 <a href="/booktest/detail/{{book.id}}">{{book.title}}</a>
+             </li>
+        </ul>
+        {% endfor %}
+    </div>
+
+
+</body>
+</html>
