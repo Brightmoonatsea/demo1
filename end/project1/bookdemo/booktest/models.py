@@ -17,6 +17,20 @@ class Book(models.Model):
         return self.title
 
 
+# class HeroManager(models.Manager):
+#
+#     def deletehero(self, heroid):
+#         hero = self.get(id=heroid)
+#         hero.delete()
+#
+#     def createhero(self, name, gender, content):
+#         hero = self.model()
+#         hero.name = name
+#         hero.gender = gender
+#         hero.content = content
+#         hero.save()
+
+
 class Hero(models.Model):
     """
     hero 类继承了Model类
@@ -26,9 +40,33 @@ class Hero(models.Model):
     gender = models.CharField(max_length=6, choices=(('male', '男'), ('female', '女')), default='male')
     content = models.CharField(max_length=100)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    # object = HeroManager()
 
     def __str__(self):
         return self.name
+
+
+class Account(models.Model):
+    username = models.CharField(max_length=10, verbose_name="用户名")
+    password = models.CharField(max_length=20, verbose_name="密码")
+    regist_date = models.DateField(auto_now_add=True, verbose_name="注册日期")
+
+
+class Concact(models.Model):
+    telephone = models.CharField(max_length=11, verbose_name="手机号")
+    email = models.EmailField(default="1150242343@qq.com")
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="con")
+
+
+class Article(models.Model):
+    title = models.CharField(max_length=20, verbose_name="标题")
+    sumary = models.TextField(verbose_name="正文")
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=10, verbose_name="标签名")
+    articles = models.ManyToManyField(Article, related_name='tags')
+
 
 
 # django orm关联查询

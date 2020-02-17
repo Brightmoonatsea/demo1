@@ -32,3 +32,6 @@ class HeroAdmin(admin.ModelAdmin):
 admin.site.register(Hero, HeroAdmin)
 
 
+
+
+
