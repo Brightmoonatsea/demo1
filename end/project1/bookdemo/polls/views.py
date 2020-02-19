@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, JsonResponse, FileResponse
 from .models import *
 # Create your views here.
-from django.views.generic import View,TemplateView,ListView,CreateView,DeleteView,UpdateView,DetailView as DV
+from django.views.generic import View, TemplateView, ListView, CreateView, DeleteView,UpdateView,DetailView as DV
 # View类为所有的视图响应类的父类
-from django.contrib.auth import authenticate,login as lin,logout as lot
+from django.contrib.auth import authenticate, login as lin, logout as lot
+
+from .forms import *
 
 
 def index(request):
@@ -134,14 +136,15 @@ def result(request,qid):
 
     try:
         question = Question.objects.get(id=qid)
-        return render(request,'polls/result.html',{"question":question})
+        return render(request,'polls/result.html', {"question": question})
     except Exception as e:
         print(e)
         return HttpResponse("问题不合法")
 
+
 class ResultView(View):
     # 方法一 继承View
-    def get(self,request,qid):
+    def get(self, request, qid):
         try:
             question = Question.objects.get(id=qid)
             return render(request, 'polls/result.html', {"question": question})
@@ -152,37 +155,54 @@ class ResultView(View):
 
 def login(request):
     if request.method == "GET":
-        return render(request,'polls/login.html')
+        lf = LoginForm()
+        return render(request, "polls/login.html", {"lf": lf})
+        # return render(request,'polls/login.html')
     elif request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        lf = LoginForm(request.POST)
+        if lf.is_valid():
+            username = lf.cleaned_data["username"]
+            password = lf.cleaned_data["password"]
+
+        # username = request.POST.get("username")
+        # password = request.POST.get("password")
         # 可以使用django自带的用户认证系统  认证成功返回用户 失败返回None
-        user = authenticate(username=username,password=password)
-        # 调用django登录方法  其实是为了生成cookie
-        if user:
-            lin(request, user)
-            url = reverse("polls:index")
-            return redirect(to=url)
-        else:
-            url = reverse("polls:login")
-            return redirect(to=url)
+            user = authenticate(username=username, password=password)
+            # 调用django登录方法  其实是为了生成cookie
+            if user:
+                lin(request, user)
+                url = reverse("polls:index")
+                return redirect(to=url)
+            else:
+                # url = reverse("polls:login")
+                # return redirect(to=url)
+                return render(request, "polls/login.html", {"errs": "用户名或密码不匹配"})
+
 
 def regist(request):
     if request.method == "GET":
-        return render(request,'polls/regist.html')
-    else:
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        password2 = request.POST.get("password2")
-        if User.objects.filter(username=username).count()>0:
-            return HttpResponse("用户名已存在")
-        else:
-            if password == password2:
-                User.objects.create_user(username=username, password=password)
-                url = reverse("polls:login")
-                return redirect(to=url)
+        rf =RegistForm()
+        return render(request, 'polls/regist.html', {"rf": rf})
+    elif request.method == "POST":
+
+        rf = RegistForm(request.POST)
+        if rf.is_valid():
+
+            username = rf.cleaned_data["username"]
+            password = rf.cleaned_data["password"]
+            password2 = rf.cleaned_data["password2"]
+            if User.objects.filter(username=username).count() > 0:
+                return HttpResponse("用户名已存在")
             else:
-                return HttpResponse("密码不一致")
+                if password == password2:
+                    # rf.save()
+                    User.objects.create_user(username=username, password=password)
+                    url = reverse("polls:login")
+                    return redirect(to=url)
+                else:
+                    return HttpResponse("密码不一致")
+        else:
+            HttpResponse("未知错误")
 
 
 
